@@ -10,6 +10,8 @@ DIVISOR = 2
 TRUE_MONKEY = 3
 FALSE_MONKEY = 4
 
+div_product = 1
+
 try:
     input = open("11.txt")
     # initialise
@@ -31,8 +33,10 @@ try:
             operations[monkey].append(int(line[29:-1]))
         else:
             operations[monkey].append(int(line[30:-1]))
+    for monkey in range(8):
+        div_product *= operations[monkey][DIVISOR]
     # keep away game
-    for round in range(1000):
+    for round in range(10000):
         for monkey in range(8):
             if len(items[monkey]) > 0:
                 inspections[monkey] += len(items[monkey])
@@ -42,11 +46,11 @@ try:
                 tru = operations[monkey][TRUE_MONKEY]
                 fal = operations[monkey][FALSE_MONKEY]
                 if opr == "**":
-                    items[monkey] = list(map(lambda a : a * a, items[monkey]))
+                    items[monkey] = list(map(lambda a : (a * a) % div_product, items[monkey]))
                 elif opr == "*":
-                    items[monkey] = list(map(lambda a : a * opd, items[monkey]))
+                    items[monkey] = list(map(lambda a : (a * opd) % div_product, items[monkey]))
                 else:
-                    items[monkey] = list(map(lambda a : a + opd, items[monkey]))
+                    items[monkey] = list(map(lambda a : (a + opd) % div_product, items[monkey]))
                 items[tru].extend([x for x in items[monkey] if x % div == 0])
                 items[fal].extend([x for x in items[monkey] if x % div != 0])
                 items[monkey].clear()
