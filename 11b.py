@@ -34,25 +34,22 @@ try:
     # keep away game
     for round in range(1000):
         for monkey in range(8):
-            inspections[monkey] += len(items[monkey])
-            opr = operations[monkey][OPERATOR]
-            opd = operations[monkey][OPERAND]
-            div = operations[monkey][DIVISOR]
-            tru = operations[monkey][TRUE_MONKEY]
-            fal = operations[monkey][FALSE_MONKEY]
-            for item in items[monkey]:
+            if len(items[monkey]) > 0:
+                inspections[monkey] += len(items[monkey])
+                opr = operations[monkey][OPERATOR]
+                opd = operations[monkey][OPERAND]
+                div = operations[monkey][DIVISOR]
+                tru = operations[monkey][TRUE_MONKEY]
+                fal = operations[monkey][FALSE_MONKEY]
                 if opr == "**":
-                    worry = item ** opd
+                    items[monkey] = list(map(lambda a : a * a, items[monkey]))
                 elif opr == "*":
-                    worry = item * opd
+                    items[monkey] = list(map(lambda a : a * opd, items[monkey]))
                 else:
-                    worry = item + opd
-#               worry = worry // 3
-                if worry % div == 0:
-                    items[tru].append(worry)
-                else:
-                    items[fal].append(worry)
-            items[monkey].clear()
+                    items[monkey] = list(map(lambda a : a + opd, items[monkey]))
+                items[tru].extend([x for x in items[monkey] if x % div == 0])
+                items[fal].extend([x for x in items[monkey] if x % div != 0])
+                items[monkey].clear()
     # find the two winners
     winner = 0
     runner_up = 0
