@@ -25,8 +25,7 @@ def build_cave(scan,start,end):
             scan[x][y] = "#"
     return scan
 
-def display_scan(scan, offset):
-    print('Offset: ', offset)
+def display_scan(scan):
     for y in range(len(scan[0])):
         for x in range(len(scan)):
             if scan[x][y]:
@@ -36,7 +35,7 @@ def display_scan(scan, offset):
         print('')
 
 def drop_sand(scan):
-    x = 500 - offset
+    x = 500
     y = 0
     finished = False
     while not finished:
@@ -73,27 +72,26 @@ try:
             s_coord = [int(c) for c in coord.split(",")]
             if s_coord != f_coord and s_coord != gf_coord and f_coord != []:
                 scan = build_cave(scan,f_coord,s_coord)
-    # trim scan
-    offset = 0
-    while True:
-        if any(scan[0]):
-            break
-        else:
-            scan.pop(0)
-            offset += 1
-    display_scan(scan, offset)
+    # floor
+    scan = build_cave(scan, [0,len(scan[0])+1],[1000,len(scan[0])+1])
+    display_scan(scan)
     # sand...
     grain_count = 0
-    abyssmal = False
-    while not abyssmal:
+    blocked = False
+    while not blocked:
         grain_rest = drop_sand(scan)
         if grain_rest[0] < 0 or grain_rest[0] >= len(scan) or grain_rest[1] >= len(scan[0]):
-            abyssmal = True
+            break
         else:
             scan[grain_rest[0]][grain_rest[1]] = "o"
             grain_count += 1
-    display_scan(scan, offset)
-    print(grain_count,' units of sand.')
+            if grain_rest[0] == 500 and grain_rest[1] == 0:
+                blocked = True
+    display_scan(scan)
+    if blocked:
+        print('Blocked at ',grain_count,' units of sand.')
+    else:
+        print('FAILED at ',grain_count,' units of sand.')
 
 finally:
     input.close()
