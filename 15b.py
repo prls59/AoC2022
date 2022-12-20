@@ -1,13 +1,19 @@
 # 1. read in all sensors
 # 2. work out manhattan distance covered by each sensor
-# 3. delete irrelevant sensors
-# 4. work out min and max (x) for each sensor at target row
-# 5. from min(x) to max(x), count covered positions
+# 3. scan area looking for unreached position (excluding detected beacons)
 
-target_row = 2000000
+def manhattan(from_x, from_y, to_x, to_y):
+    return abs(from_x - to_x) + abs(from_y - to_y)
+
 sensor = []
 distance = []
 min_max = []
+
+min_x = 0
+min_y = 0
+max_x = 4000000
+max_y = 4000000
+sensor_count = 0
 
 try:
     # 1. read in all sensors
@@ -18,40 +24,30 @@ try:
         sensor.append([])
         sensor[n] = eval("["+line+"]")
         n += 1
+    sensor_count = n
 
     # 2. work out manhattan distance covered by each sensor
     for n in range(len(sensor)):
-        md = abs(sensor[n][0] - sensor[n][2]) + abs(sensor[n][1] - sensor[n][3])
-        distance.append(md)
+        distance.append(manhattan(sensor[n][0], sensor[n][1], sensor[n][2], sensor[n][3]))
 
-    # 3. delete irrelevant sensors
-    for n in range(len(sensor) - 1, -1, -1):
-        if abs(target_row - sensor[n][1]) > distance[n]:
-            sensor.pop(n)
-            distance.pop(n)
-
-    # 4. work out min and max (x) for each sensor at target row
-    for n in range(len(sensor)):
-        min_max.append([])
-        min_max[n].append(sensor[n][0] - (distance[n] - abs(sensor[n][1] - target_row)))
-        min_max[n].append(sensor[n][0] + (distance[n] - abs(sensor[n][1] - target_row)))
-
-    # 5. from min(x) to max(x), count covered positions (excluding detected beacons)
-    min_x = min_max[0][0]
-    max_x = min_max[0][1]
-    for n in range(len(min_max)):
-        if min_max[n][0] < min_x:
-            min_x = min_max[n][0]
-        if min_max[n][1] > max_x:
-            max_x = min_max[n][1]
-    count = 0
+    # 3. scan area looking for unreached position (excluding detected beacons)
     for x in range(min_x, max_x + 1):
-        for b in range(len(sensor)):
-            if x >= min_max[b][0] and x <= min_max[b][1] and not (sensor[b][3] == target_row and sensor[b][2] == x):
-                count += 1
+        for y in range(min_y, max_y + 1):
+            found = True
+            for b in range(sensor_count):
+                if manhattan(x,y,sensor[b][0],sensor[b][1]) <= distance[b] or (sensor[b][2] == x and sensor[b][3] == y):
+                    found = False
+                    break
+            if found:
                 break
+        if found:
+            break
 
-    print(count,' positions cannot contain a beacon.')
+    if found:
+        freq = (x * 4000000) + y
+        print('Distress beacon at ',x,',',y,' Tuning frequency = ',freq)
+    else:
+        print('Not found :(')
 
 finally:
     input.close()
