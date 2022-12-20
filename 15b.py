@@ -6,7 +6,7 @@ def manhattan(from_x, from_y, to_x, to_y):
     return abs(from_x - to_x) + abs(from_y - to_y)
 
 sensor = []
-distance = []
+sensor_range = []
 min_max = []
 
 min_x = 0
@@ -28,22 +28,33 @@ try:
 
     # 2. work out manhattan distance covered by each sensor
     for n in range(len(sensor)):
-        distance.append(manhattan(sensor[n][0], sensor[n][1], sensor[n][2], sensor[n][3]))
+        sensor_range.append(manhattan(sensor[n][0], sensor[n][1], sensor[n][2], sensor[n][3]))
 
     # 3. scan area looking for unreached position (excluding detected beacons)
-    for x in range(min_x, max_x + 1):
-        for y in range(min_y, max_y + 1):
-            found = True
-            for b in range(sensor_count):
-                if manhattan(x,y,sensor[b][0],sensor[b][1]) <= distance[b] or (sensor[b][2] == x and sensor[b][3] == y):
-                    found = False
+    beacon_found = False
+    x = 0
+    while x <= max_x and not beacon_found:
+        y = 0
+        while y <= max_y and not beacon_found:
+            beacon_found = True
+            for s in range(sensor_count):
+                s_dist = manhattan(x,y,sensor[s][0],sensor[s][1])
+                if s_dist <= sensor_range[s] or (sensor[s][2] == x and sensor[s][3] == y):
+                    beacon_found = False
+                    # jump to end of sensor's reach
+                    y = sensor[s][1] + sensor_range[s] - abs(x - sensor[s][0])
                     break
-            if found:
+            if beacon_found:
                 break
-        if found:
+            else:
+                y += 1
+        if beacon_found:
             break
+        else:
+            # print(".", end="")
+            x += 1
 
-    if found:
+    if beacon_found:
         freq = (x * 4000000) + y
         print('Distress beacon at ',x,',',y,' Tuning frequency = ',freq)
     else:
